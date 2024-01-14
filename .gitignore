@@ -1,0 +1,12 @@
+# El * inicial asegura que se va a ignorar todo en un principio.
+*
+
+# Lista blanca, archivos con !, no serán ignorados.
+!*.yaml
+!.gitignore
+!*.md
+!*.sh
+!*.js*
+
+# No queremos incluir el archivo "secrets.yaml" 
+secrets.yaml
