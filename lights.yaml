@@ -1,0 +1,47 @@
+    - platform: switch
+      name: Luz de la mesilla de noel
+      entity_id: switch.enchufe_mesilla_noel_interruptor
+    - platform: switch
+      name: Luz de la mesilla de jorge
+      entity_id: switch.enchufe_mesilla_jorge_interruptor
+    - platform: switch
+      name: Luz de la mesilla de sara
+      entity_id: switch.enchufe_mesilla_sara_interruptor
+    - platform: group
+      unique_id: hom_pasillo_luces
+      name: Luces del pasillo
+      entities:
+        - light.pasillo_una
+        - light.pasillo_otra
+    - platform: group
+      unique_id: hom_salon_sofa
+      name: Luz del sofá del salón
+      entities:
+        - light.sofa_bombilla_1
+        - light.sofa_bombilla_2
+        - light.sofa_bombilla_3
+    - platform: group
+      unique_id: hom_salon
+      name: Luz del salón
+      entities:
+        - light.salon_mesa
+        - light.salon_centro
+        - light.salon_sofa
+    - platform: group
+      unique_id: hom_todas
+      name: Todas las luces
+      entities:
+        - light.mesilla_noel
+        - light.mesilla_ian
+        - light.ian
+        - light.noel
+        - light.bano_papas
+        - light.papas
+        - light.mesilla_jorge
+        - light.mesilla_sara
+        - light.cocina
+        - light.galeria
+        - light.salon_mesa
+        - light.salon_centro
+            - light.pasillo_una
+            - light.pasillo_otra

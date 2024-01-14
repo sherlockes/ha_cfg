@@ -1,0 +1,55 @@
+#########################################################################
+# Define si trabajo hoy o mañana a partir de los eventos del calendario #
+#########################################################################
+  - platform: template
+    sensors:
+      madrugo_hoy:
+        friendly_name: "Tengo que madrugar hoy?"
+        value_template: >-
+            {% set turno = state_attr('calendar.turno_de_trabajo','message') %}
+            {% set fecha_turno = state_attr('calendar.turno_de_trabajo','start_time') %}
+            {% set fecha_hoy = as_timestamp(now())|timestamp_custom("%Y-%m-%d 00:00:00") %}
+            {% if (fecha_hoy == fecha_turno and (turno == "Mañana" or turno == "Sobrante")) %}
+            true
+            {% else %}
+            false
+            {% endif %}
+            
+  - platform: template
+    sensors:
+      madrugo_manana:
+        friendly_name: "Tengo que madrugar mañana?"
+        value_template: >-
+            {% set turno = state_attr('calendar.turno_de_trabajo','message') %}
+            {% set fecha_turno = state_attr('calendar.turno_de_trabajo','start_time') %}
+            {% set fecha_manana = (as_timestamp(now()) + 86400)|timestamp_custom("%Y-%m-%d 00:00:00")  %}
+            {% if (fecha_manana == fecha_turno and (turno == "Mañana" or turno == "Sobrante")) %}
+            true
+            {% else %}
+            false
+            {% endif %}
+            
+  - platform: template
+    sensors:
+      casa_vacia:
+        friendly_name: "Esta la casa vacía?"
+        value_template: >-
+            {% set persona_1 = states('person.sherlockes') %}
+            {% set persona_2 = states('person.sara') %}
+            {% if ( persona_1 == "not_home" and persona_2 == "not_home" ) %}
+              true
+            {% else %}
+              false
+            {% endif %}
+
+  - platform: template
+    sensors:
+      estado_calefaccion:
+        friendly_name: "Estado de la calefacción"
+        value_template: >-
+            {% set hora_actual = now().strftime('%H:%M') %}
+            {% set hora_encendido = states('input_datetime.calefaccion_hora_de_encender') %}
+            {% set hora_apagado = states('input_datetime.calefaccion_hora_de_apagar') %}
+            {% set temperatura_exterior = states('sensor.temperatura_exterior') | float %}
+            {{ 'on' if hora_encendido <= hora_actual < hora_apagado and temperatura_exterior < 15 else 'off' }}
+

@@ -1,0 +1,106 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+sensor: !include sensors.yaml
+binary_sensor: !include binary_sensors.yaml
+
+zha:
+  device_config:
+    a4:c1:38:45:ce:d9:ab:18-1:
+      type: "switch"
+    a4:c1:38:39:10:48:03:71-1:
+      type: "switch"
+
+# Calcular distancias
+proximity:
+  home:
+    devices:
+      - person.sara
+      - person.sherlockes
+    tolerance: 50
+    unit_of_measurement: km
+    
+# Infrarojo del salón
+smartir:
+  update_branch: rc
+  
+media_player:
+  - platform: smartir
+    name: Living room TV
+    unique_id: living_room_tv
+    device_code: 1061
+    controller_data: remote.broadlink_remote
+    power_sensor: sensor.estado_tv
+      
+# Termostato
+climate:
+  - platform: generic_thermostat
+    unique_id: home_pasillo_termostato
+    name: Caldera
+    heater: switch.pasillo_rele_caldera
+    target_sensor: sensor.temperatura_media_de_casa
+    min_temp: 16
+    max_temp: 21.5
+    ac_mode: false
+    target_temp: 20.5
+    cold_tolerance: 0.2
+    hot_tolerance: -0.1
+    min_cycle_duration:
+      seconds: 400
+    keep_alive:
+      minutes: 3
+    initial_hvac_mode: "heat"
+    away_temp: 16
+    precision: 0.1
+
+light:
+    - platform: switch
+      name: Luz de la mesilla de noel
+      entity_id: switch.enchufe_mesilla_noel_interruptor
+    - platform: switch
+      name: Luz de la mesilla de jorge
+      entity_id: switch.enchufe_mesilla_jorge_interruptor
+    - platform: switch
+      name: Luz de la mesilla de sara
+      entity_id: switch.enchufe_mesilla_sara_interruptor
+    - platform: group
+      unique_id: hom_pasillo_luces
+      name: Luces del pasillo
+      entities:
+        - light.pasillo_una
+        - light.pasillo_otra
+    - platform: group
+      unique_id: hom_salon_sofa
+      name: Luz del sofá del salón
+      entities:
+        - light.sofa_bombilla_1
+        - light.sofa_bombilla_2
+        - light.sofa_bombilla_3
+    - platform: group
+      unique_id: hom_salon
+      name: Luz del salón
+      entities:
+        - light.salon_mesa
+        - light.salon_centro
+        - light.salon_sofa
+      
+switch:
+  - platform: wake_on_lan
+    name: NAS
+    mac: 00:11:32:E5:A2:C1
+    host: 192.168.10.200
+    turn_off:
+      service: synology_dsm.shutdown
+
+shell_command:
+  menores_on: ssh -i /config/.ssh/id_rsa -o StrictHostKeyChecking=no pi@192.168.10.210 'sudo ./setGroupStatus.sh Menores enable'
+  menores_off: ssh -i /config/.ssh/id_rsa -o StrictHostKeyChecking=no pi@192.168.10.210 'sudo ./setGroupStatus.sh Menores disable'
+  

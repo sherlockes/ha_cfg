@@ -1,0 +1,75 @@
+#### Custom sensors
+  - platform: average
+    unique_id: hom.temperatura.media
+    name: 'Temperatura media de casa'
+    entities:
+      - sensor.temperatura_dormitorio
+      - sensor.temperatura_ian
+      - sensor.temperatura_noel
+      - sensor.temperatura_salon
+      
+  - platform: template
+    sensors:
+        es_lectivo_hoy:
+          value_template: >
+            {% if states('calendar.festivos_escolares') == 'on' or now().isoweekday() >= 6 %}
+              no
+            {% else %}
+              si
+            {% endif %}
+            
+  - platform: template
+    sensors:
+      modo_tv:
+        friendly_name: "Modo de Tv según horario"
+        value_template: >-          
+            {% set ahora = as_timestamp(now()) | timestamp_custom('%H:%M:%S') %}
+            {% set A = states("input_datetime.tv_off") > states("input_datetime.tv_on") %}
+            {% set B = ahora > states("input_datetime.tv_off") %}
+            {% set C = ahora < states("input_datetime.tv_on") %}
+            
+            {% if (A and ( B or C )) or ( not A and B and C ) %}
+            off
+            {% else %}
+            on
+            {% endif %}
+            
+  - platform: template
+    sensors:
+      estado_tv:
+        friendly_name: "Como está la tele?"
+        value_template: >-
+            {% set consumo_tv = int(states('sensor.salon_tv_enchufe_vatios')) %}
+            {% if consumo_tv > 50 %}
+            on
+            {% else %}
+            off
+            {% endif %}
+
+  - platform: template
+    sensors:
+      zigbee_unavailable_count:
+        friendly_name: "Dispositivos zigbee no disponibles"
+        value_template: >-
+            {% set zigbee = namespace(unavailable=[]) %}
+            {% for entity in integration_entities('zha') %}
+              {% if states(entity) == 'unavailable' %}
+                {% set nombre = device_attr(device_id(entity), 'name_by_user') %}
+                {% if nombre not in zigbee.unavailable %}
+                  {% set zigbee.unavailable = zigbee.unavailable + [nombre] %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ zigbee.unavailable | length }}
+            
+  - platform: template
+    sensors:
+      consigna_calefaccion:
+        friendly_name: "Consigna de Tª para la calefaccion"
+        value_template: >-
+            {% if states ('binary_sensor.casa_vacia') == 'on' %}
+            {% set consigna = 18 %}
+            {% else %}
+            {% set consigna = 20.5 %}
+            {% endif %}
+            {{ consigna }}

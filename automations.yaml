@@ -1,0 +1,735 @@
+- id: '1700136781192'
+  alias: Noel - Mesilla - Pulsación corta
+  description: ''
+  trigger:
+  - device_id: 08642b2dd6082ded56fb212e6daf464b
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+  condition: []
+  action:
+  - type: toggle
+    device_id: 62d35f4e848f27d96ce51971bafd53e3
+    entity_id: e432699663ec81d408909a49166fa9c0
+    domain: switch
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.noel
+  mode: single
+- id: '1700137501752'
+  alias: Ian - Mesilla - Pulsación corta
+  description: ''
+  trigger:
+  - device_id: d0f133db54f9e249020183aa455bb0c0
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+  condition: []
+  action:
+  - service: light.toggle
+    data: {}
+    target:
+      entity_id: light.mesilla_ian
+  - service: light.turn_off
+    target:
+      device_id: c25111758ed55860fb2e335484a0b518
+    data: {}
+  mode: single
+- id: '1700158444163'
+  alias: General - Reseteo diario
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.automatizacion_reseteo_hora
+  condition:
+  - condition: state
+    entity_id: input_boolean.automatizacion_reseteo_diario
+    state: 'on'
+  action:
+  - service: hassio.host_reboot
+  mode: single
+- id: '1700162492937'
+  alias: Papas - mesilla - jorge - pulsación corta
+  description: ''
+  trigger:
+  - device_id: f9432bd71e89389dee5ba54179f65ce6
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: remote_button_short_press
+  condition: []
+  action:
+  - service: light.toggle
+    data: {}
+    target:
+      entity_id: light.mesilla_jorge
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.papas
+  mode: single
+- id: '1700171787970'
+  alias: General - Luces - Apagar todas
+  description: Apaga todas las luces cuando se hace una pulsación larga de la mesilla
+    o no hay nadie en casa
+  trigger:
+  - device_id: f9432bd71e89389dee5ba54179f65ce6
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: remote_button_long_press
+  - platform: state
+    entity_id:
+    - binary_sensor.casa_vacia
+    to: 'on'
+  - device_id: 3124cdbd6d8f0f286edcac77bb865cee
+    domain: zha
+    platform: device
+    type: remote_button_long_press
+    subtype: button
+  condition: []
+  action:
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: all
+  mode: single
+- id: '1700243261927'
+  alias: Galería - Luz - Pulsador
+  description: ''
+  trigger:
+  - device_id: 840cbf2ffcad21d700cfb02073db68e0
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: remote_button_short_press
+  condition: []
+  action:
+  - service: light.toggle
+    data: {}
+    target:
+      entity_id: light.galeria
+  mode: single
+- id: '1700248041124'
+  alias: Papas - mesilla - sara - pulsación corta
+  description: ''
+  trigger:
+  - device_id: 3124cdbd6d8f0f286edcac77bb865cee
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button
+  condition: []
+  action:
+  - service: light.toggle
+    data: {}
+    target:
+      entity_id: light.mesilla_sara
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.papas
+  mode: single
+- id: '1700658600184'
+  alias: Pasillo - Luz auto
+  description: Enciende la luz del pasillo al pulsar y la apaga cuando deja de detectar
+    movimiento.
+  trigger:
+  - platform: state
+    entity_id:
+    - light.pasillo_una
+    to: 'on'
+  - platform: state
+    entity_id:
+    - light.pasillo_otra
+    to: 'on'
+  condition: []
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      area_id: pasillo
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.movimiento_pasillo
+      to: 'off'
+    timeout:
+      hours: 0
+      minutes: 5
+      seconds: 0
+      milliseconds: 0
+  - service: light.turn_off
+    data: {}
+    target:
+      area_id: pasillo
+  mode: single
+- id: '1701042162280'
+  alias: General - Madrugar - Cole
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.automatizacion_madrugar_cole_hora
+  condition:
+  - condition: state
+    entity_id: input_boolean.automatizacion_madrugar_cole
+    state: 'on'
+  - condition: state
+    entity_id: sensor.es_lectivo_hoy
+    state: si
+  action:
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.echo_del_salon
+    data:
+      media_content_type: custom
+      media_content_id: pon el volumen al tres en todas partes
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.echo_de_papas
+    data:
+      media_content_type: custom
+      media_content_id: pon las noticias de la ser
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.mesilla_sara
+      - light.mesilla_jorge
+  - wait_template: '{{ now().hour == 8 }}'
+    continue_on_timeout: true
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.echo_del_salon
+    data:
+      media_content_type: custom
+      media_content_id: pon música en todas partes
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.mesilla_ian
+      - light.mesilla_noel
+      - light.mesilla_sara
+      - light.mesilla_jorge
+  - service: cover.open_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.persiana_salon
+      - cover.persiana_ian
+      - cover.persiana_noel
+      - cover.persiana_dormitorio
+  - delay:
+      hours: 0
+      minutes: 4
+      seconds: 0
+      milliseconds: 0
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.echo_del_salon
+    data:
+      media_content_type: custom
+      media_content_id: Para la música en todas partes
+  - wait_template: '{{ now().hour == 8 and now().minute == 38 }}'
+    continue_on_timeout: true
+  - service: notify.alexa_media_echo_del_salon
+    data:
+      message: Ya es hora de salir hacia el cole si no queréis hacer tarde.
+  - delay:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: all
+  mode: single
+- id: '1701198502850'
+  alias: Salón - TV - On/Off auto
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.modo_tv
+  condition:
+  - condition: state
+    entity_id: input_boolean.automatizacion_tele_apagado
+    state: 'on'
+  action:
+  - service: switch.turn_{{ states("sensor.modo_tv") }}
+    data: {}
+    target:
+      entity_id: switch.enchufe_tv_salon
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 30
+      milliseconds: 0
+  - if:
+    - condition: numeric_state
+      entity_id: sensor.salon_tv_enchufe_vatios
+      above: 50
+    then:
+    - service: media_player.turn_off
+      data: {}
+      target:
+        entity_id: media_player.living_room_tv
+  mode: single
+- id: '1701782776431'
+  alias: Baño - Encender luz
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.movimiento_bano_chicos
+    to: 'on'
+  condition: []
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      area_id: bano
+  - wait_for_trigger:
+    - platform: state
+      entity_id:
+      - binary_sensor.movimiento_bano_chicos
+      to: 'off'
+      for:
+        hours: 0
+        minutes: 4
+        seconds: 0
+  - service: light.turn_off
+    data: {}
+    target:
+      area_id: bano
+  mode: single
+- id: '1703347991349'
+  alias: General - Madrugar - Trabajo
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.madrugar_trabajo
+  condition:
+  - condition: state
+    entity_id: binary_sensor.madrugo_hoy
+    state: 'on'
+  - condition: state
+    entity_id: person.sherlockes
+    state: home
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id:
+      - light.mesilla_jorge
+      - light.aseo
+      - light.cocina
+  mode: single
+- id: '1703533039587'
+  alias: Disco USB - Apagar
+  description: Apaga el disco a los diez minutos de haber apagado el NAS
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.nas
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+  condition: []
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.pasillo_disco_usb
+  mode: single
+- id: '1703534133576'
+  alias: Sofá - Apagar movimiento
+  description: Apaga el movimiento del sofá a los cinco minutos de haberse apagado
+    la TV
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.enchufe_tv_salon
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  - platform: state
+    entity_id:
+    - media_player.living_room_tv
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  condition: []
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.movimiento_sofa
+  mode: single
+- id: '1703534405955'
+  alias: Escritorio de Ian - Apagar
+  description: Apaga el escritorio de Ian a los cinco minutos de haber apagado el
+    ordenador
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sensor.enchufe_escritorio_ian_potencia
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+    below: 40
+  condition: []
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.escritorio_ian
+  mode: single
+- id: '1703540119755'
+  alias: Router - Reseteo
+  description: Resetea el router cada dos días a las 6:00 A.M.
+  trigger:
+  - platform: time
+    at: 06:00:00
+  condition:
+  - condition: time
+    weekday:
+    - mon
+    - fri
+  action:
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.pasillo_router
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 15
+      milliseconds: 0
+  - service: switch.turn_on
+    data: {}
+    target:
+      entity_id: switch.pasillo_router
+  mode: single
+- id: '1703611921071'
+  alias: Galería - Luz - Puerta
+  description: Enciende la luz de la galería al abrir la puerta
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.cocina_galeria_puerta
+  - platform: state
+    entity_id:
+    - binary_sensor.galeria_puerta
+  condition: []
+  action:
+  - target:
+      entity_id: light.galeria
+    data: {}
+    service: light.turn_{{ 'on' if state_attr('sun.sun','elevation') < 11 and (states('binary_sensor.cocina_galeria_puerta')
+      == 'on' or states('binary_sensor.galeria_puerta') == 'on') else 'off' }}
+  mode: single
+- id: '1703612326237'
+  alias: General - Bajar persianas
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - sun.sun
+    attribute: elevation
+    below: -5
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.temperatura_exterior
+    below: 16
+  action:
+  - service: cover.close_cover
+    data: {}
+    target:
+      entity_id:
+      - cover.persiana_salon
+      - cover.persiana_galeria
+      - cover.persiana_ian
+      - cover.persiana_noel
+      - cover.persiana_dormitorio
+  mode: single
+- id: '1703614730034'
+  alias: General - ZHA - Dispositivos FDS
+  description: Envía una notificación cuando varía el número de dispositivos zigbee
+    fuera de servicio
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.zigbee_unavailable_count
+  condition: []
+  action:
+  - service: notify.notify
+    data:
+      title: ZHA Devices FDS
+      message: Revisa la lista de dispositivos Zigbee FDS (Hay {{ states('sensor.zigbee_unavailable_count')
+        }} FDS)
+  mode: single
+- id: '1703616226999'
+  alias: General - Batería baja
+  description: ''
+  use_blueprint:
+    path: sbyx/low-battery-level-detection-notification-for-all-battery-sensors.yaml
+    input:
+      threshold: 30
+      actions:
+      - service: notify.notify
+        data:
+          message: Revisa el estado de las pilas de {{sensors}}
+          title: Batería baja
+      exclude:
+        entity_id: []
+        device_id: ac6a1ebf4c937a66b300bcb7de5ad07f
+- id: '1703758488939'
+  alias: Calefaccion - ON/OFF
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.estado_calefaccion
+  - platform: homeassistant
+    event: start
+  - platform: state
+    entity_id:
+    - sensor.consigna_calefaccion
+  condition: []
+  action:
+  - service: climate.turn_{{ states('binary_sensor.estado_calefaccion') }}
+    target:
+      entity_id: climate.caldera
+  - service: climate.set_temperature
+    target:
+      entity_id: climate.caldera
+    data_template:
+      temperature: '{{ states(''sensor.consigna_calefaccion'') | float }}'
+  mode: single
+- id: '1704647861036'
+  alias: Router - Antiapagado
+  description: Vuelve a conectar el router si han pasado más de 30 sg desde que ha
+    sido apagado
+  trigger:
+  - platform: device
+    type: turned_off
+    device_id: d7cad0d24bb7cf260a348fa67f7eb934
+    entity_id: 36c0e9ae83612e951e9c8d625c323905
+    domain: switch
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+  condition: []
+  action:
+  - service: switch.turn_on
+    target:
+      entity_id: switch.pasillo_router
+    data: {}
+  mode: single
+- id: '1704650486266'
+  alias: General - Alarma
+  description: ''
+  trigger: []
+  condition: []
+  action:
+  - repeat:
+      count: 2
+      sequence:
+      - service: media_player.play_media
+        target:
+          entity_id:
+          - media_player.echo_de_ian
+          - media_player.echo_de_noel
+          - media_player.echo_del_salon
+          - media_player.echo_flex_de_jorge
+          - media_player.echo_de_papas
+        data:
+          media_content_type: sound
+          media_content_id: amzn_sfx_scifi_alarm_04
+  mode: single
+- id: '1704652666180'
+  alias: General - Malos hábitos
+  description: ''
+  trigger:
+  - device_id: 7c1a9174912411a6835040ec54aef164
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button_1
+  condition: []
+  action:
+  - service: counter.increment
+    target:
+      entity_id: counter.malos_habitos
+    data: {}
+  - service: notify.alexa_media_echo_del_salon
+    data:
+      message: Eso ha sido un mal comportamiento, la suma de hoy es {{ states('counter.malos_habitos')
+        }}
+  mode: single
+- id: '1704653642934'
+  alias: General - Malos hábitos (Reset)
+  description: ''
+  trigger:
+  - platform: time
+    at: 02:00:00
+  condition: []
+  action:
+  - if:
+    - condition: numeric_state
+      entity_id: counter.malos_habitos
+      above: 0
+    then:
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.tv_off_kids
+      data_template:
+        time: '{{(((state_attr(''input_datetime.tv_off_kids'' , ''timestamp'')) -
+          60) | timestamp_custom(''%H:%M'', false))}}'
+    else:
+    - service: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.tv_off_kids
+      data_template:
+        time: '{{(((state_attr(''input_datetime.tv_off_kids'' , ''timestamp'')) +
+          60) | timestamp_custom(''%H:%M'', false))}}'
+  - service: counter.reset
+    target:
+      entity_id: counter.malos_habitos
+    data: {}
+  mode: single
+- id: '1704712921807'
+  alias: Salón - TV - Apagado niños
+  description: ''
+  trigger:
+  - platform: time
+    at: input_datetime.tv_off_kids
+  condition:
+  - condition: state
+    entity_id: input_boolean.automatizacion_tele_apagado
+    state: 'on'
+  - condition: time
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - sun
+  action:
+  - service: notify.alexa_media_echo_del_salon
+    data:
+      message: Ha llegado la hora de apagar la tele
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - if:
+    - condition: state
+      entity_id: sensor.estado_tv
+      state: 'on'
+    then:
+    - service: media_player.turn_off
+      target:
+        entity_id: media_player.living_room_tv
+      data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: switch.turn_off
+    target:
+      entity_id: switch.enchufe_tv_salon
+    data: {}
+  mode: single
+- id: '1704881469000'
+  alias: Impresora - Apagado auto
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.enchufe_impresora
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+  condition: []
+  action:
+  - type: turn_off
+    device_id: d852af76a9d71abf08a97cb899a94da6
+    entity_id: b02c371c94e0db43dbbf1c8e22dd0c14
+    domain: switch
+  mode: single
+- id: '1705185830736'
+  alias: Pi-hole - Habilitar Menores
+  description: ''
+  trigger:
+  - platform: homeassistant
+    event: start
+  - platform: state
+    entity_id:
+    - input_boolean.pihole_menores
+    to: 'on'
+  condition: []
+  action:
+  - service: shell_command.menores_on
+    data: {}
+  - service: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.pihole_menores
+    data: {}
+  mode: single
+- id: '1705185921674'
+  alias: Pi-hole - Deshabilitar Menores
+  description: ''
+  trigger:
+  - platform: time
+    at: '10:00:00'
+  - platform: state
+    entity_id:
+    - input_boolean.pihole_menores
+    to: 'off'
+  condition: []
+  action:
+  - service: shell_command.menores_off
+    data: {}
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.pihole_menores
+  mode: single
+- id: '1705226967054'
+  alias: Salón - TV light
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_button.luz_tv
+    to:
+  condition: []
+  action:
+  - service: remote.send_command
+    target:
+      device_id: c0f60bda2e3556cb9438842394a7c315
+    data:
+      num_repeats: 1
+      delay_secs: 0.4
+      command: on-off
+      device: tv_light
+  mode: single
