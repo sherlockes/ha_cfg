@@ -236,14 +236,34 @@
       media_content_id: Para la música en todas partes
   - wait_template: '{{ now().hour == 8 and now().minute == 38 }}'
     continue_on_timeout: true
-  - service: notify.alexa_media_echo_del_salon
+  - service: media_player.volume_set
+    target:
+      device_id: 75138e1913c9c0f37b29a9e99543576a
+      entity_id:
+      - media_player.echo_de_noel
+      - media_player.echo_del_salon
+      - media_player.echo_de_ian
     data:
-      message: Ya es hora de salir hacia el cole si no queréis hacer tarde.
-  - delay:
-      hours: 0
-      minutes: 2
-      seconds: 0
-      milliseconds: 0
+      volume_level: 0.5
+  - service: notify.alexa_media
+    data:
+      target:
+      - media_player.echo_de_ian
+      - media_player.echo_de_noel
+      - media_player.echo_del_salon
+      message: Es la hora de salir hacia el cole si no queréis llegar tarde.
+      data:
+        type: announce
+        method: all
+        volume: 0.1
+  - wait_template: '{{ is_state(''binary_sensor.pasillo_puerta_apertura'', ''on'')
+      }}'
+    continue_on_timeout: true
+    timeout: '120'
+  - wait_template: '{{ is_state(''binary_sensor.pasillo_puerta_apertura'', ''off'')
+      }}'
+    continue_on_timeout: true
+    timeout: '120'
   - service: light.turn_off
     data: {}
     target:
@@ -322,6 +342,13 @@
     entity_id: person.sherlockes
     state: home
   action:
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.echo_de_papas
+    data:
+      media_content_id: pon el volumen al 3
+      media_content_type: custom
+    metadata: {}
   - service: light.turn_on
     data: {}
     target:
@@ -329,6 +356,82 @@
       - light.mesilla_jorge
       - light.aseo
       - light.cocina
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.echo_de_papas
+    data:
+      media_content_id: pon el canario de no me pises que llevo chanclas
+      media_content_type: custom
+    metadata: {}
+  - wait_for_trigger:
+    - device_id: f9432bd71e89389dee5ba54179f65ce6
+      domain: zha
+      platform: device
+      type: remote_button_double_press
+      subtype: remote_button_double_press
+    timeout:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - service: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.mesilla_jorge
+  - service: light.turn_on
+    target:
+      entity_id:
+      - light.mesilla_jorge
+    data: {}
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.echo_de_papas
+    data:
+      media_content_id: para
+      media_content_type: custom
+    metadata: {}
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.echo_de_papas
+    data:
+      media_content_id: pon el volumen al 1
+      media_content_type: custom
+    metadata: {}
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.echo_de_papas
+    data:
+      media_content_id: quita la alarma de las cuatro y cincuenta y cinco de la mañana
+      media_content_type: custom
+    metadata: {}
+  - service: media_player.play_media
+    target:
+      entity_id: media_player.echo_de_papas
+    data:
+      media_content_id: pon el volumen al 4
+      media_content_type: custom
+    metadata: {}
+  - wait_for_trigger:
+    - type: opened
+      platform: device
+      device_id: e4a339a2965e582ffe076382247369b2
+      entity_id: 633e572b27248e982af6e6870051d944
+      domain: binary_sensor
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 2
+    timeout:
+      hours: 0
+      minutes: 15
+      seconds: 0
+      milliseconds: 0
+  - service: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: all
   mode: single
 - id: '1703533039587'
   alias: Disco USB - Apagar
@@ -389,7 +492,7 @@
       hours: 0
       minutes: 5
       seconds: 0
-    below: 40
+    below: 25
   condition: []
   action:
   - service: switch.turn_off
@@ -560,6 +663,7 @@
         data:
           media_content_type: sound
           media_content_id: amzn_sfx_scifi_alarm_04
+    enabled: true
   mode: single
 - id: '1704652666180'
   alias: General - Malos hábitos
@@ -650,7 +754,7 @@
   - delay:
       hours: 0
       minutes: 0
-      seconds: 10
+      seconds: 5
       milliseconds: 0
   - service: switch.turn_off
     target:
@@ -700,7 +804,7 @@
   description: ''
   trigger:
   - platform: time
-    at: '10:00:00'
+    at: '10:30:00'
   - platform: state
     entity_id:
     - input_boolean.pihole_menores
@@ -732,4 +836,38 @@
       delay_secs: 0.4
       command: on-off
       device: tv_light
+  mode: single
+- id: '1706015304178'
+  alias: Cocina - Derrame
+  description: ''
+  trigger:
+  - type: moist
+    platform: device
+    device_id: 9abb0a3b532f2f80665298d58eb44759
+    entity_id: ebdce1d21f2ba6084be3563fca20bc42
+    domain: binary_sensor
+  condition: []
+  action:
+  - service: notify.mobile_app_sm_g975f
+    data:
+      message: El sensor de derrame de la cocina se ha humedecido
+  - service: persistent_notification.create
+    metadata: {}
+    data:
+      message: El sensor de humedad de debajo del lavavajillas está mojado.
+  mode: single
+- id: '1707139447681'
+  alias: Salón - Plex
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_button.plex
+  condition: []
+  action:
+  - service: media_player.select_source
+    target:
+      device_id: 700bcf1b981d6f0f9a8f6686787a945d
+    data:
+      source: com.plexapp.android
   mode: single
