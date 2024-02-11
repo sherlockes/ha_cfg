@@ -871,3 +871,33 @@
     data:
       source: com.plexapp.android
   mode: single
+- id: '1707590917131'
+  alias: Pasillo - Luz ON auto
+  description: Enciende la luz del pasillo al detectar movimiento con la puerta abierta.
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.movimiento_pasillo
+    to: 'on'
+  - type: opened
+    platform: device
+    device_id: e4a339a2965e582ffe076382247369b2
+    entity_id: 633e572b27248e982af6e6870051d944
+    domain: binary_sensor
+  condition:
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.pasillo_puerta_apertura
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.movimiento_pasillo
+      state: 'on'
+  - condition: time
+    after: '16:00:00'
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      area_id: pasillo
+  mode: single
