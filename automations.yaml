@@ -500,32 +500,6 @@
     target:
       entity_id: switch.escritorio_ian
   mode: single
-- id: '1703540119755'
-  alias: Router - Reseteo
-  description: Resetea el router cada dos días a las 6:00 A.M.
-  trigger:
-  - platform: time
-    at: 06:00:00
-  condition:
-  - condition: time
-    weekday:
-    - mon
-    - fri
-  action:
-  - service: switch.turn_off
-    data: {}
-    target:
-      entity_id: switch.pasillo_router
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 15
-      milliseconds: 0
-  - service: switch.turn_on
-    data: {}
-    target:
-      entity_id: switch.pasillo_router
-  mode: single
 - id: '1703611921071'
   alias: Galería - Luz - Puerta
   description: Enciende la luz de la galería al abrir la puerta
@@ -621,27 +595,6 @@
       entity_id: climate.caldera
     data_template:
       temperature: '{{ states(''sensor.consigna_calefaccion'') | float }}'
-  mode: single
-- id: '1704647861036'
-  alias: Router - Antiapagado
-  description: Vuelve a conectar el router si han pasado más de 30 sg desde que ha
-    sido apagado
-  trigger:
-  - platform: device
-    type: turned_off
-    device_id: d7cad0d24bb7cf260a348fa67f7eb934
-    entity_id: 36c0e9ae83612e951e9c8d625c323905
-    domain: switch
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 30
-  condition: []
-  action:
-  - service: switch.turn_on
-    target:
-      entity_id: switch.pasillo_router
-    data: {}
   mode: single
 - id: '1704650486266'
   alias: General - Alarma

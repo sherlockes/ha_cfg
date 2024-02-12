@@ -19,15 +19,6 @@ zha:
     a4:c1:38:39:10:48:03:71-1:
       type: "switch"
 
-# Calcular distancias
-proximity:
-  home:
-    devices:
-      - person.sara
-      - person.sherlockes
-    tolerance: 50
-    unit_of_measurement: km
-    
 # Infrarojo del salón
 smartir:
   update_branch: rc

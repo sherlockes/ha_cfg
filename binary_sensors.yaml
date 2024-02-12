@@ -28,7 +28,10 @@
             {% else %}
             false
             {% endif %}
-            
+
+#############################################
+# Define si la casa está vacía (true/false) #
+#############################################
   - platform: template
     sensors:
       casa_vacia:
@@ -42,6 +45,13 @@
               false
             {% endif %}
 
+#######################################################
+# Condiciones de encendido de la calefacción (on/off) #
+#                                                     #
+# - Dentro del horario de encendido                   #
+# - Tª exterior menor de 18 ºC                        #
+# - Alguien a menos de 30 Km de casa                  #
+#######################################################
   - platform: template
     sensors:
       estado_calefaccion:
@@ -51,5 +61,6 @@
             {% set hora_encendido = states('input_datetime.calefaccion_hora_de_encender') %}
             {% set hora_apagado = states('input_datetime.calefaccion_hora_de_apagar') %}
             {% set temperatura_exterior = states('sensor.temperatura_exterior') | float %}
-            {{ 'on' if hora_encendido <= hora_actual < hora_apagado and temperatura_exterior < 15 else 'off' }}
+            {{ 'on' if hora_encendido <= hora_actual < hora_apagado and temperatura_exterior < 18 and states('proximity.home')|int < 30 else 'off' }}
+
 
