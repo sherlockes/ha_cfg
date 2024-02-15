@@ -848,6 +848,7 @@
       state: 'on'
   - condition: time
     after: '16:00:00'
+    before: '22:15:00'
   action:
   - service: light.turn_on
     data: {}
