@@ -306,7 +306,7 @@
   trigger:
   - platform: state
     entity_id:
-    - binary_sensor.movimiento_bano_chicos
+    - binary_sensor.movimiento_bano_ocupacion
     to: 'on'
   condition: []
   action:

@@ -12,6 +12,8 @@ scene: !include scenes.yaml
 sensor: !include sensors.yaml
 binary_sensor: !include binary_sensors.yaml
 
+zha_toolkit:
+
 zha:
   device_config:
     a4:c1:38:45:ce:d9:ab:18-1:
