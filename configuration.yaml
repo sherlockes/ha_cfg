@@ -12,7 +12,6 @@ scene: !include scenes.yaml
 sensor: !include sensors.yaml
 binary_sensor: !include binary_sensors.yaml
 
-
 zha:
   custom_quirks_path: /config/zha_quirks/
   device_config:
