@@ -51,8 +51,12 @@
       zigbee_unavailable_count:
         friendly_name: "Dispositivos zigbee no disponibles"
         value_template: >-
+            {% set zha_entities = integration_entities('zha') %}
+            {% set mqtt_entities = integration_entities('mqtt') %}
+            {% set zigbee_entities = zha_entities + mqtt_entities %}
             {% set zigbee = namespace(unavailable=[]) %}
-            {% for entity in integration_entities('zha') %}
+            
+            {% for entity in zigbee_entities %}
               {% if states(entity) == 'unavailable' %}
                 {% set nombre = device_attr(device_id(entity), 'name_by_user') %}
                 {% if nombre not in zigbee.unavailable %}

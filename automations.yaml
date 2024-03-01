@@ -300,39 +300,6 @@
       target:
         entity_id: media_player.living_room_tv
   mode: single
-- id: '1701782776431'
-  alias: Baño - Encender luz
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.movimiento_bano_presence
-    to: 'on'
-  condition: []
-  action:
-  - service: light.turn_on
-    data: {}
-    target:
-      area_id: bano
-  - wait_for_trigger:
-    - platform: state
-      entity_id:
-      - binary_sensor.movimiento_bano_presence
-      to: 'off'
-      for:
-        hours: 0
-        minutes: 0
-        seconds: 0
-    timeout:
-      hours: 0
-      minutes: 15
-      seconds: 0
-      milliseconds: 0
-  - service: light.turn_off
-    data: {}
-    target:
-      area_id: bano
-  mode: single
 - id: '1703347991349'
   alias: General - Madrugar - Trabajo
   description: ''
@@ -839,15 +806,15 @@
     to: 'on'
   - type: opened
     platform: device
-    device_id: e4a339a2965e582ffe076382247369b2
-    entity_id: 633e572b27248e982af6e6870051d944
+    device_id: 761b9335e6279d1cc4f86fb184e552ce
+    entity_id: fbdf4e7c036c9867565f27598fab55e5
     domain: binary_sensor
   condition:
   - condition: and
     conditions:
     - condition: state
-      entity_id: binary_sensor.pasillo_puerta_apertura
       state: 'on'
+      entity_id: binary_sensor.puerta_pasillo
     - condition: state
       entity_id: binary_sensor.movimiento_pasillo_presencia
       state: 'on'
@@ -909,6 +876,24 @@
     - binary_sensor.movimiento_bano_presence
     to: 'off'
     id: fuera
+  - platform: device
+    type: turned_on
+    device_id: bc702637db617ddfe2bec05d87bf9bda
+    entity_id: 422e75878eee4bd404b5501334215b22
+    domain: light
+    id: dentro
+  - platform: device
+    type: turned_off
+    device_id: bc702637db617ddfe2bec05d87bf9bda
+    entity_id: 422e75878eee4bd404b5501334215b22
+    domain: light
+    id: fuera
+  - platform: device
+    type: turned_on
+    device_id: fc747d9204689d55361058f09ecdbd55
+    entity_id: 73f81ebd063fc31eb55692d4d6c74aee
+    domain: light
+    id: dentro
   condition: []
   action:
   - if:
@@ -916,11 +901,14 @@
       id:
       - dentro
     then:
-    - choose:
-      - conditions: []
-        sequence: []
     - service: light.turn_on
       target:
-        area_id: bano
+        entity_id: light.bano
       data: {}
+    else:
+    - service: light.turn_off
+      metadata: {}
+      data: {}
+      target:
+        area_id: bano
   mode: single
