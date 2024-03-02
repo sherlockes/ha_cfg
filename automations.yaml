@@ -577,17 +577,9 @@
   - repeat:
       count: 2
       sequence:
-      - service: media_player.play_media
-        target:
-          entity_id:
-          - media_player.echo_de_ian
-          - media_player.echo_de_noel
-          - media_player.echo_del_salon
-          - media_player.echo_flex_de_jorge
-          - media_player.echo_de_papas
-        data:
-          media_content_type: sound
-          media_content_id: amzn_sfx_scifi_alarm_04
+      - service: script.1709292794874
+        metadata: {}
+        data: {}
     enabled: true
   mode: single
 - id: '1704652666180'
@@ -911,4 +903,23 @@
       data: {}
       target:
         area_id: bano
+  mode: single
+- id: '1709318585944'
+  alias: Cocina - Luz ON
+  description: ''
+  trigger:
+  - type: motion
+    platform: device
+    device_id: 65a9585b0ef4151fb595f4ab9e7d5c69
+    entity_id: 8b3747cd4b3acf3ffe40e246a4fd1bd3
+    domain: binary_sensor
+  condition:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+  action:
+  - service: light.turn_on
+    target:
+      area_id: cocina
+    data: {}
   mode: single

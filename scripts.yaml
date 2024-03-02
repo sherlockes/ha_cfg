@@ -1,0 +1,25 @@
+'1709292794874':
+  alias: Sonido alarma
+  sequence:
+  - service: media_player.play_media
+    target:
+      entity_id:
+      - media_player.echo_de_ian
+      - media_player.echo_de_noel
+      - media_player.echo_del_salon
+      - media_player.echo_flex_de_jorge
+      - media_player.echo_de_papas
+    data:
+      media_content_type: sound
+      media_content_id: amzn_sfx_scifi_alarm_01
+  - service: media_player.play_media
+    target:
+      entity_id:
+      - media_player.echo_de_ian
+      - media_player.echo_de_noel
+      - media_player.echo_del_salon
+      - media_player.echo_flex_de_jorge
+      - media_player.echo_de_papas
+    data:
+      media_content_type: sound
+      media_content_id: amzn_sfx_scifi_alarm_01
