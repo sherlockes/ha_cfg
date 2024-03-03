@@ -387,13 +387,9 @@
   - wait_for_trigger:
     - type: opened
       platform: device
-      device_id: e4a339a2965e582ffe076382247369b2
-      entity_id: 633e572b27248e982af6e6870051d944
+      device_id: 761b9335e6279d1cc4f86fb184e552ce
+      entity_id: fbdf4e7c036c9867565f27598fab55e5
       domain: binary_sensor
-      for:
-        hours: 0
-        minutes: 0
-        seconds: 2
     timeout:
       hours: 0
       minutes: 15
@@ -819,41 +815,6 @@
     target:
       area_id: pasillo
   mode: single
-- id: '1708961881642'
-  alias: Aseo - Luz ON
-  description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.movimiento_aseo_occupancy
-    to: 'on'
-  condition: []
-  action:
-  - service: light.turn_on
-    data: {}
-    target:
-      area_id:
-      - aseo
-  - wait_for_trigger:
-    - platform: state
-      entity_id:
-      - binary_sensor.movimiento_aseo_occupancy
-      to: 'off'
-      for:
-        hours: 0
-        minutes: 2
-        seconds: 0
-    timeout:
-      hours: 0
-      minutes: 15
-      seconds: 0
-      milliseconds: 0
-  - service: light.turn_off
-    data: {}
-    target:
-      area_id:
-      - aseo
-  mode: single
 - id: '1708973067233'
   alias: Baño - Luz
   description: ''
@@ -922,4 +883,41 @@
     target:
       area_id: cocina
     data: {}
+  mode: single
+- id: '1709382011001'
+  alias: Aseo - Luz
+  description: ''
+  trigger:
+  - type: motion
+    platform: device
+    device_id: f7f59313c61b55c78dc27f11ad35a133
+    entity_id: 3afe13cae7641c98f0e61f0d1c962c7e
+    domain: binary_sensor
+    id: dentro
+  - type: no_motion
+    platform: device
+    device_id: f7f59313c61b55c78dc27f11ad35a133
+    entity_id: 3afe13cae7641c98f0e61f0d1c962c7e
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0
+    id: fuera
+  condition: []
+  action:
+  - if:
+    - condition: trigger
+      id:
+      - dentro
+    then:
+    - service: light.turn_on
+      target:
+        area_id: aseo
+      data: {}
+    else:
+    - service: light.turn_off
+      target:
+        area_id: aseo
+      data: {}
   mode: single
