@@ -866,23 +866,106 @@
         area_id: bano
   mode: single
 - id: '1709318585944'
-  alias: Cocina - Luz ON
+  alias: Cocina - Luces
   description: ''
   trigger:
-  - type: motion
+  - platform: template
+    value_template: '{{ is_state(''binary_sensor.movimiento_cocina_occupancy'', ''on'')
+      and is_state(''sun.sun'', ''below_horizon'') }}'
+    id: encender_luz_cocina
+    alias: Cuando alguien entra a la cocina de noche
+  - device_id: 840cbf2ffcad21d700cfb02073db68e0
+    domain: zha
+    platform: device
+    type: remote_button_double_press
+    subtype: remote_button_double_press
+    id: antimosquitos
+    alias: Pulsación doble del botón de la galería
+  - alias: No hay nadie en la cocina
+    type: no_motion
     platform: device
     device_id: 65a9585b0ef4151fb595f4ab9e7d5c69
     entity_id: 8b3747cd4b3acf3ffe40e246a4fd1bd3
     domain: binary_sensor
-  condition:
-  - condition: state
-    entity_id: sun.sun
-    state: below_horizon
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    id: apagar_luz_cocina
+  - platform: template
+    value_template: "{{ is_state('binary_sensor.cocina_galeria_puerta', 'on') and
+      is_state('sun.sun', 'below_horizon') and\n   states('sensor.temperatura_exterior')
+      | float > 13 }}"
+    id: antimosquitos
+    alias: Abrir la puerta de noche con más de 13ºC en la calle
+  condition: []
   action:
-  - service: light.turn_on
-    target:
-      area_id: cocina
-    data: {}
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - encender_luz_cocina
+      sequence:
+      - service: light.turn_on
+        target:
+          area_id: cocina
+        data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - antimosquitos
+      sequence:
+      - service: light.turn_off
+        target:
+          area_id: cocina
+        data: {}
+      - service: light.turn_on
+        target:
+          area_id: galeria
+        data: {}
+      - wait_for_trigger:
+        - type: opened
+          platform: device
+          device_id: 6ed2d7174218a72172440ccbaab1859e
+          entity_id: 4b778e2f9d0eebcf186e890c8a3e1bdc
+          domain: binary_sensor
+          for:
+            hours: 0
+            minutes: 0
+            seconds: 0
+        timeout:
+          hours: 0
+          minutes: 0
+          seconds: 15
+          milliseconds: 0
+      - wait_for_trigger:
+        - type: not_opened
+          platform: device
+          device_id: 6ed2d7174218a72172440ccbaab1859e
+          entity_id: 4b778e2f9d0eebcf186e890c8a3e1bdc
+          domain: binary_sensor
+          for:
+            hours: 0
+            minutes: 0
+            seconds: 0
+        timeout:
+          hours: 0
+          minutes: 10
+          seconds: 0
+          milliseconds: 0
+      - service: light.turn_on
+        target:
+          area_id: cocina
+        data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - apagar_luz_cocina
+      sequence:
+      - service: light.turn_off
+        target:
+          area_id: cocina
+        data: {}
   mode: single
 - id: '1709382011001'
   alias: Aseo - Luz
