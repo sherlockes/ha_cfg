@@ -134,39 +134,80 @@
       entity_id: light.papas
   mode: single
 - id: '1700658600184'
-  alias: Pasillo - Luz auto
+  alias: Pasillo - Luces
   description: Enciende la luz del pasillo al pulsar y la apaga cuando deja de detectar
     movimiento.
   trigger:
-  - platform: state
-    entity_id:
-    - light.pasillo_una
-    to: 'on'
-  - platform: state
-    entity_id:
-    - light.pasillo_otra
-    to: 'on'
+  - platform: template
+    value_template: '{% set pasillo_una_on = is_state(''light.pasillo_una'', ''on'')
+      %}
+
+      {% set pasillo_otra_on = is_state(''light.pasillo_otra'', ''on'') %}
+
+      {{ pasillo_una_on or pasillo_otra_on }}'
+    alias: Se enciende una de la dos luces
+    id: encendido_manual
+  - platform: template
+    value_template: '{% set pasillo_una_off = is_state(''light.pasillo_una'', ''off'')
+      %}
+
+      {% set pasillo_otra_off = is_state(''light.pasillo_otra'', ''off'') %}
+
+      {{ pasillo_una_off or pasillo_otra_off }}'
+    id: apagado_manual
+    alias: Se apaga una de las dos luces
+  - platform: template
+    value_template: '{% set door_open = is_state(''binary_sensor.puerta_pasillo'',
+      ''on'') %}
+
+      {% set motion_detected = is_state(''binary_sensor.movimiento_pasillo_presencia'',
+      ''on'') %}
+
+      {% set current_time = now().strftime(''%H:%M'') %}
+
+      {{ door_open and motion_detected and ''16:00'' <= current_time <= ''22:15''
+      }}'
+    id: encendido_auto
+    alias: Puerta abierta y movimiento antes de las 22:15
   condition: []
   action:
-  - service: light.turn_on
-    data: {}
-    target:
-      area_id: pasillo
-  - wait_for_trigger:
-    - platform: state
-      entity_id:
-      - binary_sensor.movimiento_pasillo_presencia
-      to: 'off'
-    timeout:
-      hours: 0
-      minutes: 10
-      seconds: 0
-      milliseconds: 0
-  - service: light.turn_off
-    data: {}
-    target:
-      area_id: pasillo
-  mode: single
+  - alias: Encendido - Apagado
+    choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - encendido_manual
+        - encendido_auto
+      sequence:
+      - service: light.turn_on
+        data: {}
+        target:
+          area_id: pasillo
+      - wait_for_trigger:
+        - platform: state
+          entity_id:
+          - binary_sensor.movimiento_pasillo_presencia
+          to: 'off'
+        timeout:
+          hours: 0
+          minutes: 10
+          seconds: 0
+          milliseconds: 0
+      - service: light.turn_off
+        data: {}
+        target:
+          area_id: pasillo
+    - conditions:
+      - condition: trigger
+        id:
+        - apagado_manual
+      sequence:
+      - service: light.turn_off
+        target:
+          area_id:
+          - pasillo
+        data: {}
+  mode: restart
 - id: '1701042162280'
   alias: General - Madrugar - Cole
   description: ''
@@ -784,37 +825,6 @@
     data:
       source: com.plexapp.android
   mode: single
-- id: '1707590917131'
-  alias: Pasillo - Luz ON auto
-  description: Enciende la luz del pasillo al detectar movimiento con la puerta abierta.
-  trigger:
-  - platform: state
-    entity_id:
-    - binary_sensor.movimiento_pasillo_presencia
-    to: 'on'
-  - type: opened
-    platform: device
-    device_id: 761b9335e6279d1cc4f86fb184e552ce
-    entity_id: fbdf4e7c036c9867565f27598fab55e5
-    domain: binary_sensor
-  condition:
-  - condition: and
-    conditions:
-    - condition: state
-      state: 'on'
-      entity_id: binary_sensor.puerta_pasillo
-    - condition: state
-      entity_id: binary_sensor.movimiento_pasillo_presencia
-      state: 'on'
-  - condition: time
-    after: '16:00:00'
-    before: '22:15:00'
-  action:
-  - service: light.turn_on
-    data: {}
-    target:
-      area_id: pasillo
-  mode: single
 - id: '1708973067233'
   alias: Baño - Luz
   description: ''
@@ -1008,16 +1018,6 @@
   alias: Salón - Luces
   description: ''
   trigger:
-  - alias: Se apaga el centro con la TV apagada
-    platform: template
-    value_template: '{{ trigger.event.data.entity_id.startswith(''light'') and states("media_player.living_room_tv")
-      == "off" and states("light.salon_centro") == "off" }}'
-    id: apagar_todas
-  - platform: template
-    value_template: '{{ trigger.event.data.entity_id.startswith(''light'') and states("media_player.living_room_tv")
-      == "on" and states("light.salon_centro") == "off" }}'
-    alias: Se apaga el centro con la TV encendida
-    id: solo_tv
   - platform: template
     value_template: '{{ states("light.salon_sofa") == "on" and ( states("light.salon_mesa")
       == "on" or states("light.salon_centro") == "on" ) }}'
@@ -1028,22 +1028,38 @@
       == "off" and states("light.salon_centro") == "off" }}'
     id: solo_tv
     alias: Sólo la luz del sofá
+    enabled: true
+  - platform: state
+    entity_id:
+    - light.salon_centro
+    from: 'on'
+    to: 'off'
+    id: apagar_centro
+    enabled: true
+    alias: Se apaga la luz del centro
   condition: []
   action:
   - choose:
     - conditions:
       - condition: trigger
         id:
-        - apagar_todas
+        - apagar_centro
+      - condition: state
+        entity_id: media_player.living_room_tv
+        state: 'off'
       sequence:
       - service: light.turn_off
         target:
           area_id: salon
         data: {}
+      alias: Se apaga el centro con la TV apagada
     - conditions:
       - condition: trigger
         id:
-        - solo_tv
+        - apagar_centro
+      - condition: state
+        entity_id: media_player.living_room_tv
+        state: 'on'
       sequence:
       - service: light.turn_off
         metadata: {}
@@ -1059,6 +1075,7 @@
           kelvin: 2000
           transition: 20
           brightness_step_pct: 40
+      alias: Se apaga el centro con la TV encendida
     - conditions:
       - condition: trigger
         id:
@@ -1070,4 +1087,18 @@
         data:
           kelvin: 6500
           brightness_step_pct: 100
+      alias: Se enciende alguna luz además de la del sofá
+    - conditions:
+      - condition: trigger
+        id:
+        - solo_tv
+      sequence:
+      - service: light.turn_on
+        target:
+          entity_id: light.salon_sofa
+        data:
+          kelvin: 2000
+          transition: 20
+          brightness_step_pct: 40
+      alias: Se enciende sólo la luz del sofá
   mode: single
