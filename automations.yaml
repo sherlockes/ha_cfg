@@ -97,22 +97,6 @@
     target:
       entity_id: all
   mode: single
-- id: '1700243261927'
-  alias: Galería - Luz - Pulsador
-  description: ''
-  trigger:
-  - device_id: 840cbf2ffcad21d700cfb02073db68e0
-    domain: zha
-    platform: device
-    type: remote_button_short_press
-    subtype: remote_button_short_press
-  condition: []
-  action:
-  - service: light.toggle
-    data: {}
-    target:
-      entity_id: light.galeria
-  mode: single
 - id: '1700248041124'
   alias: Papas - mesilla - sara - pulsación corta
   description: ''
@@ -510,46 +494,106 @@
       entity_id: switch.escritorio_ian
   mode: single
 - id: '1703611921071'
-  alias: Galería - Luz - Puerta
-  description: Enciende la luz de la galería al abrir la puerta
+  alias: Galería - Luz
+  description: Enciende la luz de la galería al abrir la puerta o una pulsación corta
+    del pulsador
   trigger:
   - platform: state
     entity_id:
     - binary_sensor.cocina_galeria_puerta
+    id: puerta
   - platform: state
     entity_id:
     - binary_sensor.galeria_puerta
+    id: puerta
+  - device_id: 840cbf2ffcad21d700cfb02073db68e0
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: remote_button_short_press
+    id: pulsador
   condition: []
   action:
-  - target:
-      entity_id: light.galeria
-    data: {}
-    service: light.turn_{{ 'on' if state_attr('sun.sun','elevation') < 11 and (states('binary_sensor.cocina_galeria_puerta')
-      == 'on' or states('binary_sensor.galeria_puerta') == 'on') else 'off' }}
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - puerta
+      sequence:
+      - target:
+          entity_id: light.galeria
+        data: {}
+        service: light.turn_{{ 'on' if state_attr('sun.sun','elevation') < 11 and
+          (states('binary_sensor.cocina_galeria_puerta') == 'on' or states('binary_sensor.galeria_puerta')
+          == 'on') else 'off' }}
+      alias: Cambia el estado de una puerta
+    - conditions:
+      - condition: trigger
+        id:
+        - pulsador
+      sequence:
+      - service: light.toggle
+        data: {}
+        target:
+          entity_id: light.galeria
+        alias: Alternar luz de la galería
   mode: single
 - id: '1703612326237'
-  alias: General - Bajar persianas
+  alias: General - Persianas
   description: ''
   trigger:
-  - platform: numeric_state
-    entity_id:
-    - sun.sun
-    attribute: elevation
-    below: -5
-  condition:
-  - condition: numeric_state
-    entity_id: sensor.temperatura_exterior
-    below: 16
+  - platform: template
+    value_template: '{% set sun_elevation = state_attr(''sun.sun'', ''elevation'')
+      %}
+
+      {% set exterior_temperature = states(''sensor.temperatura_exterior'') | float
+      %}
+
+      {{ sun_elevation < -5 and exterior_temperature < 15 }}'
+    id: frio_no_sol
+    alias: Hace frío y se esconde el sol
+  - alias: Hace calor y levanta el sol
+    platform: template
+    value_template: '{% set sun_elevation = state_attr(''sun.sun'', ''elevation'')
+      %}
+
+      {% set exterior_temperature = states(''sensor.temperatura_exterior'') | float
+      %}
+
+      {{ sun_elevation > 25 and exterior_temperature > 24 }}'
+    id: calor_sol
+  condition: []
   action:
-  - service: cover.close_cover
-    data: {}
-    target:
-      entity_id:
-      - cover.persiana_salon
-      - cover.persiana_galeria
-      - cover.persiana_ian
-      - cover.persiana_noel
-      - cover.persiana_dormitorio
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - frio_no_sol
+      sequence:
+      - service: cover.close_cover
+        data: {}
+        target:
+          entity_id:
+          - cover.persiana_salon
+          - cover.persiana_galeria
+          - cover.persiana_ian
+          - cover.persiana_noel
+          - cover.persiana_dormitorio
+      alias: Bajar todas persianas cuando hace frío y se esconde el sol
+    - conditions:
+      - condition: trigger
+        id:
+        - calor_sol
+      sequence:
+      - service: cover.set_cover_position
+        data:
+          position: 50
+        target:
+          entity_id:
+          - cover.persiana_salon
+          - cover.persiana_galeria
+          - cover.persiana_dormitorio
+      alias: Bajar la mitad las persianas del patio cundo levanta el sol con calor
   mode: single
 - id: '1703614730034'
   alias: General - ZHA - Dispositivos FDS
@@ -604,20 +648,6 @@
       entity_id: climate.caldera
     data_template:
       temperature: '{{ states(''sensor.consigna_calefaccion'') | float }}'
-  mode: single
-- id: '1704650486266'
-  alias: General - Alarma
-  description: ''
-  trigger: []
-  condition: []
-  action:
-  - repeat:
-      count: 2
-      sequence:
-      - service: script.1709292794874
-        metadata: {}
-        data: {}
-    enabled: true
   mode: single
 - id: '1704652666180'
   alias: General - Malos hábitos
