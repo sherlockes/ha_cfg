@@ -97,8 +97,15 @@ switch:
     host: 192.168.10.200
     turn_off:
       service: synology_dsm.shutdown
+  - platform: wake_on_lan
+    name: dever
+    mac: 84:47:09:24:9e:fc
+    host: 192.168.10.211
+    turn_off:
+      service: shell_command.turn_off_dever
 
 shell_command:
   menores_on: ssh -i /config/.ssh/id_rsa -o StrictHostKeyChecking=no pi@192.168.10.210 'sudo ./setGroupStatus.sh Menores enable'
   menores_off: ssh -i /config/.ssh/id_rsa -o StrictHostKeyChecking=no pi@192.168.10.210 'sudo ./setGroupStatus.sh Menores disable'
+  turn_off_dever: ssh -i /config/.ssh/id_rsa -o StrictHostKeyChecking=no sherlockes@192.168.10.211 'sudo shutdown -h now'
   
