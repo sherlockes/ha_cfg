@@ -539,19 +539,24 @@
         alias: Alternar luz de la galería
   mode: single
 - id: '1703612326237'
-  alias: General - Persianas
+  alias: Persianas
   description: ''
   trigger:
-  - platform: template
-    value_template: '{% set sun_elevation = state_attr(''sun.sun'', ''elevation'')
-      %}
+  - alias: Hace frío y se esconde el sol
+    platform: template
+    value_template: '{% set ta_minima = states(''sensor.aemet_daily_forecast_temperature_low'')
+      | float %}
+
+      {% set sun_elevation = state_attr(''sun.sun'', ''elevation'') %}
 
       {% set exterior_temperature = states(''sensor.temperatura_exterior'') | float
       %}
 
-      {{ sun_elevation < -5 and exterior_temperature < 15 }}'
+      {{ sun_elevation < -5 and now().hour < 22 and (ta_minima < 10 or exterior_temperature
+      < 14) }}
+
+      '
     id: frio_no_sol
-    alias: Hace frío y se esconde el sol
   - alias: Hace calor y levanta el sol
     platform: template
     value_template: '{% set sun_elevation = state_attr(''sun.sun'', ''elevation'')
@@ -560,7 +565,10 @@
       {% set exterior_temperature = states(''sensor.temperatura_exterior'') | float
       %}
 
-      {{ sun_elevation > 25 and exterior_temperature > 24 }}'
+      {% set salon_temperature = states(''sensor.temperatura_salon'') | float %}
+
+      {{ 24 < sun_elevation < 55 and (exterior_temperature > 23 or salon_temperature
+      > 23) }}'
     id: calor_sol
   condition: []
   action:
@@ -1131,4 +1139,41 @@
           transition: 20
           brightness_step_pct: 40
       alias: Se enciende sólo la luz del sofá
+  mode: single
+- id: '1712509645912'
+  alias: Alarma
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.entra_alguien
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: input_boolean.alarma
+    state: 'on'
+  action:
+  - service: notify.notify
+    data:
+      message: Un intruso ha entrado a casa
+      title: Atención¡¡¡
+  - service: notify.persistent_notification
+    data:
+      message: Se ha disparado la alarma
+      title: Intruso en casa
+    enabled: true
+  - service: siren.turn_on
+    target:
+      entity_id: siren.pasillo_alarma
+    data: {}
+    enabled: false
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 10
+      milliseconds: 0
+  - service: siren.turn_off
+    target:
+      entity_id: siren.pasillo_alarma
+    data: {}
   mode: single

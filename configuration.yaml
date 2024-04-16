@@ -107,5 +107,5 @@ switch:
 shell_command:
   menores_on: ssh -i /config/.ssh/id_rsa -o StrictHostKeyChecking=no pi@192.168.10.210 'sudo ./setGroupStatus.sh Menores enable'
   menores_off: ssh -i /config/.ssh/id_rsa -o StrictHostKeyChecking=no pi@192.168.10.210 'sudo ./setGroupStatus.sh Menores disable'
-  turn_off_dever: ssh -i /config/.ssh/id_rsa -o StrictHostKeyChecking=no sherlockes@192.168.10.211 'sudo shutdown -h now'
+  turn_off_dever: "ssh sherlockes@192.168.10.211 sudo systemctl poweroff"
   

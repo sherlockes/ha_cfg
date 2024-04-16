@@ -62,5 +62,24 @@
             {% set hora_apagado = states('input_datetime.calefaccion_hora_de_apagar') %}
             {% set temperatura_exterior = states('sensor.temperatura_exterior') | float %}
             {{ 'on' if hora_encendido <= hora_actual < hora_apagado and temperatura_exterior < 18 and states('proximity.home')|int < 30 else 'off' }}
+            
+
+#######################################################
+# Está entrando alguien en casa (true/false)          #
+#                                                     #
+# - Abierta la puerta de entrada                      #
+# - Detectado movimiento en el pasillo                #
+# -                                                   #
+#######################################################  
+  - platform: template
+    sensors:
+      entra_alguien:
+        friendly_name: "Está entrando alguien"
+        value_template: >-
+            {% if states.binary_sensor.puerta_pasillo.state == 'on' and states.binary_sensor.movimiento_pasillo_presencia.state == 'on' %}
+              true
+            {% else %}
+              false
+            {% endif %}
 
 
